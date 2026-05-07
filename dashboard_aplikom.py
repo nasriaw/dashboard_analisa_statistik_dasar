@@ -37,7 +37,7 @@ st.markdown("---")
 
 # Display data preview
 st.subheader("Preview Data Asli")
-st.dataframe(data.head())
+st.dataframe(data) #.head())
 
 # Menu selection using selectbox
 st.markdown("### Pilih Menu Analisis")
@@ -52,7 +52,7 @@ menu_options = [
     "Uji Hipotesis"
 ]
 
-selected_menu = st.selectbox("📋 Menu Navigasi:", menu_options)
+selected_menu = st.sidebar.radio("📋 Menu Navigasi:", menu_options)
 
 # === MENU: PENGERTIAN STATISTIKA ===
 if selected_menu == "Pengertian Statistika":
