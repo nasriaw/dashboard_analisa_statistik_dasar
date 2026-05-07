@@ -8,7 +8,6 @@ from scipy import stats
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
-from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import pingouin as pg
 
 # Load data
@@ -28,6 +27,7 @@ st.set_page_config(
    initial_sidebar_state="expanded",
    menu_items=None)
 
+
 # Main content
 st.title("Aplikom Statistika Menggunakan Python")
 st.markdown("---")
@@ -36,10 +36,10 @@ st.markdown("**Python Library:** streamlit, pandas, numpy, statsmodels, scipy, s
 st.markdown("---")
 
 # Display data preview
-st.subheader("Preview Data Asli")
+st.subheader("Preview Data")
 st.dataframe(data) #.head())
 
-# Menu selection using selectbox
+# Menu selection using selectbox (box format)
 st.markdown("### Pilih Menu Analisis")
 menu_options = [
     "Pengertian Statistika",
@@ -142,7 +142,7 @@ print(random_sample.head())
 import pandas as pd
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasaan_client.csv')
+data = pd.read_csv('data_test_300_kepuasan_client.csv')
 
 # Create categories
 bins = [0, 40, 60, 80, 100]
@@ -158,7 +158,8 @@ print(stratified_sample.head())
 elif selected_menu == "Statistik Deskriptif":
     st.header("📊 Statistik Deskriptif")
     st.markdown("Analisis statistik deskriptif untuk dataset:")
-    
+    st.dataframe(data.describe().T)  # Tampilkan statistik deskriptif untuk semua kolom numerik
+
     # Select columns for analysis
     numeric_cols = ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien']
     selected_col = st.selectbox("Pilih Variabel:", numeric_cols)
@@ -190,7 +191,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasaan_client.csv')
+data = pd.read_csv('data_test_300_kepuasan_client.csv')
 
 # Select variable
 selected_col = 'KepuasanKlien'
@@ -271,7 +272,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasaan_client.csv')
+data = pd.read_csv('data_test_300_kepuasan_client.csv')
 
 # Histogram
 fig_hist = px.histogram(data, x='KepuasanKlien', nbins=20)
@@ -326,7 +327,7 @@ import pandas as pd
 import plotly.express as px
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasaan_client.csv')
+data = pd.read_csv('data_test_300_kepuasan_client.csv')
 
 # Correlation matrix
 corr_matrix = data.corr()
@@ -369,7 +370,7 @@ elif selected_menu == "Regresi":
         
         # Display results
         st.markdown("**Model Summary:**")
-        st.text(model.summary())
+        st.write(model.summary())
         
         # Predictions
         st.subheader("Prediksi")
@@ -401,7 +402,7 @@ elif selected_menu == "Regresi":
             
             # Display results
             st.markdown("**Model Summary:**")
-            st.text(model.summary())
+            st.write(model.summary())
             
             # Uji asumsi
             st.subheader("Uji Asumsi Regresi")
@@ -434,10 +435,18 @@ elif selected_menu == "Regresi":
             
             # Prediksi
             st.subheader("Prediksi")
+            for i in range(len(x_vars)):
+                st.markdown(f"Masukkan nilai {x_vars[i]}:")
+                new_value = st.slider(f"{x_vars[i]}:",
+                                    int(data[x_vars[i]].min()), int(data[x_vars[i]].max()),
+                                    int(data[x_vars[i]].mean()))
+                X_new = [1] + [new_value if var == x_vars[i] else 0 for var in x_vars]
+                prediction = model.predict(X_new)
+                st.markdown(f"Prediksi {y_var} untuk {x_vars[i]}={new_value}: {prediction[0]:.2f}")
             if len(x_vars) == 1:
-                new_value = st.slider(f"Masukkan nilai {x_vars[0]}:", 
-                                     int(data[x_vars[0]].min()), int(data[x_vars[0]].max()), 
-                                     int(data[x_vars[0]].mean()))
+                new_value = st.slider(f"Masukkan nilai {x_vars[0]}:",
+                                    int(data[x_vars[0]].min()), int(data[x_vars[0]].max()),
+                                    int(data[x_vars[0]].mean()))
                 prediction = model.predict([1, new_value])
                 st.markdown(f"Prediksi {y_var} untuk {x_vars[0]}={new_value}: {prediction[0]:.2f}")
             else:
@@ -453,7 +462,7 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 import plotly.express as px
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasaan_client.csv')
+data = pd.read_csv('data_test_300_kepuasan_client.csv')
 
 # Regresi linear sederhana
 X = data['JamKerja']
@@ -492,30 +501,35 @@ elif selected_menu == "ANOVA":
     st.markdown("### Dataset Contoh untuk ANOVA")
     st.markdown("Dataset ini menggambarkan tingkat kepuasan pelanggan berdasarkan jenis layanan dan tingkat pengalaman:")
     
-    # Buat dataset contoh
+    # Buat dataset contoh yang lebih seimbang
     np.random.seed(42)
     data_anova = pd.DataFrame({
         'Kepuasan': np.concatenate([
-            np.random.normal(85, 5, 20),  # Layanan A
-            np.random.normal(78, 6, 20),  # Layanan B
-            np.random.normal(88, 4, 10)   # Layanan C
+            np.random.normal(85, 5, 15),   # Layanan A - Pemula
+            np.random.normal(88, 4, 15),   # Layanan A - Menengah
+            np.random.normal(78, 6, 15),   # Layanan B - Pemula
+            np.random.normal(82, 5, 15),   # Layanan B - Menengah
+            np.random.normal(90, 4, 15),   # Layanan C - Pemula
+            np.random.normal(92, 3, 15),   # Layanan C - Menengah
         ]),
-        'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10,
-        'TingkatPengalaman': np.concatenate([
-            ['Pemula']*10 + ['Menengah']*10,  # Layanan A
-            ['Pemula']*10 + ['Menengah']*10,  # Layanan B
-            ['Ahli']*10                       # Layanan C
-        ])
+        'JenisLayanan': ['A']*30 + ['B']*30 + ['C']*30,
+        'TingkatPengalaman': ['Pemula']*15 + ['Menengah']*15 + ['Pemula']*15 + ['Menengah']*15 + ['Pemula']*15 + ['Menengah']*15
     })
     
     st.dataframe(data_anova.head())
+    st.write(f"Total observasi: {len(data_anova)}")
+    
+    # Tampilkan tabel kontingensi
+    contingency_table = pd.crosstab(data_anova['JenisLayanan'], data_anova['TingkatPengalaman'])
+    st.markdown("**Tabel Kontingensi:**")
+    st.dataframe(contingency_table)
     
     # Pilih tipe ANOVA
     anova_type = st.selectbox("Pilih Tipe ANOVA:", ["One-Way ANOVA", "Two-Way ANOVA"])
     
     if anova_type == "One-Way ANOVA":
         st.subheader("One-Way ANOVA")
-        cat_var = st.selectbox("Pilih Variabel Kategori:", ['JenisLayanan'])
+        cat_var = st.selectbox("Pilih Variabel Kategori:", ['JenisLayanan', 'TingkatPengalaman'])
         num_var = st.selectbox("Pilih Variabel Numerik:", ['Kepuasan'])
         
         try:
@@ -533,10 +547,10 @@ elif selected_menu == "ANOVA":
             st.markdown(f"**p-value: {p_value:.4f}**")
             if p_value < 0.05:
                 st.markdown("✅ Ada perbedaan signifikan antara kelompok (p < 0.05)")
-                st.markdown("Kesimpulan: Setidaknya ada satu jenis layanan yang berbeda secara signifikan")
+                st.markdown("Kesimpulan: Setidaknya ada satu kelompok yang berbeda secara signifikan")
             else:
                 st.markdown("❌ Tidak ada perbedaan signifikan antara kelompok (p ≥ 0.05)")
-                st.markdown("Kesimpulan: Tidak ada bukti perbedaan antar jenis layanan")
+                st.markdown("Kesimpulan: Tidak ada bukti perbedaan antar kelompok")
             
             # Post-hoc test (Tukey HSD)
             st.subheader("Post-hoc Test: Tukey HSD")
@@ -576,7 +590,7 @@ elif selected_menu == "ANOVA":
             st.dataframe(desc_stats)
             
         except Exception as e:
-            st.error(f"Terjadi error saat melakukan ANOVA: {str(e)}")
+            st.error(f"Terjadi error saat melakukan One-Way ANOVA: {str(e)}")
         
         # Source code
         st.markdown("### Source Code One-Way ANOVA")
@@ -593,11 +607,11 @@ import plotly.express as px
 np.random.seed(42)
 data_anova = pd.DataFrame({
     'Kepuasan': np.concatenate([
-        np.random.normal(85, 5, 20),  # Layanan A
-        np.random.normal(78, 6, 20),  # Layanan B
-        np.random.normal(88, 4, 10)   # Layanan C
+        np.random.normal(85, 5, 15),   # Layanan A
+        np.random.normal(78, 6, 15),   # Layanan B
+        np.random.normal(90, 4, 15)    # Layanan C
     ]),
-    'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10
+    'JenisLayanan': ['A']*15 + ['B']*15 + ['C']*15
 })
 
 # One-Way ANOVA
@@ -620,14 +634,33 @@ fig_bar.show()
     
     elif anova_type == "Two-Way ANOVA":
         st.subheader("Two-Way ANOVA")
+        
+        # Pilih variabel dengan validasi
         cat_var1 = st.selectbox("Pilih Variabel Kategori 1:", ['JenisLayanan', 'TingkatPengalaman'])
         cat_var2 = st.selectbox("Pilih Variabel Kategori 2:", ['JenisLayanan', 'TingkatPengalaman'], 
                                index=1 if cat_var1 == 'JenisLayanan' else 0)
         num_var = st.selectbox("Pilih Variabel Numerik:", ['Kepuasan'])
         
+        # Validasi
+        if cat_var1 == cat_var2:
+            st.error("❌ Pilih dua variabel kategori yang berbeda!")
+            st.stop()
+        
         try:
+            # Cek frekuensi sel
+            contingency_table = pd.crosstab(data_anova[cat_var1], data_anova[cat_var2])
+            st.markdown("**Tabel Kontingensi (frekuensi):**")
+            st.dataframe(contingency_table)
+            
+            # Cek apakah ada sel dengan frekuensi < 5
+            if (contingency_table < 5).any().any():
+                st.warning("⚠️ Beberapa sel memiliki frekuensi < 5. Hasil ANOVA mungkin tidak optimal.")
+            
             # Perform Two-Way ANOVA
-            model = ols(f'{num_var} ~ C({cat_var1}) + C({cat_var2}) + C({cat_var1}):C({cat_var2})', data=data_anova).fit()
+            formula = f'{num_var} ~ C({cat_var1}) + C({cat_var2}) + C({cat_var1}):C({cat_var2})'
+            st.markdown(f"**Rumus ANOVA:** `{formula}`")
+            
+            model = ols(formula, data=data_anova).fit()
             anova_table = anova_lm(model)
             
             st.markdown("**Tabel ANOVA:**")
@@ -636,16 +669,21 @@ fig_bar.show()
             # Get p-values safely
             p_value_col = 'PR(>F)' if 'PR(>F)' in anova_table.columns else 'PR(>F)'
             
-            p_value_main1 = anova_table[p_value_col][0]
-            p_value_main2 = anova_table[p_value_col][1]
-            p_value_interaction = anova_table[p_value_col][2]
+            # Ambil nilai p-value dengan penanganan error
+            try:
+                p_value_main1 = anova_table[p_value_col][0]
+                p_value_main2 = anova_table[p_value_col][1]
+                p_value_interaction = anova_table[p_value_col][2]
+            except IndexError:
+                st.error("❌ Tidak cukup data untuk menghitung semua efek. Dataset perlu diperbesar.")
+                st.stop()
             
             st.markdown(f"**p-value {cat_var1}: {p_value_main1:.4f}**")
             st.markdown(f"**p-value {cat_var2}: {p_value_main2:.4f}**")
             st.markdown(f"**p-value Interaksi: {p_value_interaction:.4f}**")
             
             # Interpretasi
-            st.subheader("Interpretasi Hasil")
+            st.subheader("📊 Interpretasi Hasil")
             
             if p_value_main1 < 0.05:
                 st.markdown(f"✅ Efek utama {cat_var1} signifikan (p < 0.05)")
@@ -659,35 +697,67 @@ fig_bar.show()
                 
             if p_value_interaction < 0.05:
                 st.markdown("✅ Ada interaksi signifikan antara faktor (p < 0.05)")
-                st.markdown("Kesimpulan: Efek satu faktor bergantung pada faktor lain")
-                st.markdown("Contoh: Perbedaan kepuasan antar layanan berbeda untuk setiap tingkat pengalaman")
+                st.markdown("📝 Kesimpulan: Efek satu faktor bergantung pada faktor lain")
+                
+                # Visualisasi interaksi
+                st.subheader("📈 Visualisasi Interaksi")
+                interaction_plot = data_anova.groupby([cat_var1, cat_var2])[num_var].mean().reset_index()
+                fig = px.line(interaction_plot, x=cat_var1, y=num_var, color=cat_var2, 
+                            title=f'Interaksi {cat_var1} x {cat_var2} terhadap {num_var}')
+                st.plotly_chart(fig)
+                
+                # Analisis simple effects
+                st.subheader("🔍 Analisis Efek Sederhana")
+                for level in data_anova[cat_var2].unique():
+                    subset = data_anova[data_anova[cat_var2] == level]
+                    if len(subset) > 10:  # Pastikan cukup data
+                        model_simple = ols(f'{num_var} ~ C({cat_var1})', data=subset).fit()
+                        anova_simple = anova_lm(model_simple)
+                        try:
+                            p_simple = anova_simple['PR(>F)'][0]
+                            st.markdown(f"**Efek {cat_var1} untuk {cat_var2}={level}: p = {p_simple:.4f}**")
+                            
+                            # Visualisasi simple effects
+                            fig_simple = px.box(subset, x=cat_var1, y=num_var, 
+                                               title=f'Distribusi {num_var} per {cat_var1} ({cat_var2}={level})')
+                            st.plotly_chart(fig_simple)
+                        except:
+                            st.info(f"Tidak bisa menghitung efek sederhana untuk {cat_var2}={level}")
             else:
                 st.markdown("❌ Tidak ada interaksi signifikan antara faktor (p ≥ 0.05)")
-                st.markdown("Kesimpulan: Efek faktor bersifat independen")
-            
-            # Visualisasi interaksi
-            st.subheader("Visualisasi Interaksi")
-            interaction_plot = data_anova.groupby([cat_var1, cat_var2])[num_var].mean().reset_index()
-            fig = px.line(interaction_plot, x=cat_var1, y=num_var, color=cat_var2, 
-                        title=f'Interaksi {cat_var1} x {cat_var2} terhadap {num_var}')
-            st.plotly_chart(fig)
-            
-            # Simple effects analysis
-            st.subheader("Analisis Efek Sederhana")
-            if cat_var1 == 'JenisLayanan' and cat_var2 == 'TingkatPengalaman':
-                for tingkat in data_anova['TingkatPengalaman'].unique():
-                    subset = data_anova[data_anova['TingkatPengalaman'] == tingkat]
-                    model_simple = ols('Kepuasan ~ C(JenisLayanan)', data=subset).fit()
-                    anova_simple = anova_lm(model_simple)
-                    p_simple = anova_simple['PR(>F)'][0]
-                    st.markdown(f"**Efek JenisLayanan untuk {tingkat}: p = {p_simple:.4f}**")
+                st.markdown("📝 Kesimpulan: Efek faktor bersifat independen")
+                
+                # Visualisasi tanpa interaksi
+                st.subheader("📊 Visualisasi Efek Utama")
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    fig1 = px.box(data_anova, x=cat_var1, y=num_var, title=f'Distribusi per {cat_var1}')
+                    st.plotly_chart(fig1)
+                
+                with col2:
+                    fig2 = px.box(data_anova, x=cat_var2, y=num_var, title=f'Distribusi per {cat_var2}')
+                    st.plotly_chart(fig2)
             
         except Exception as e:
-            st.error(f"Terjadi error saat melakukan Two-Way ANOVA: {str(e)}")
-        
-        # Source code
-        st.markdown("### Source Code Two-Way ANOVA")
-        st.code("""
+            st.error(f"❌ Terjadi error saat melakukan Two-Way ANOVA: {str(e)}")
+            st.markdown("### 🔧 Kemungkinan Penyebab dan Solusi:")
+            st.markdown("1. **Data tidak cukup**: Pastikan setiap kombinasi kategori memiliki minimal 5 observasi")
+            st.markdown("2. **Variabel sama**: Pastikan memilih dua variabel kategori yang berbeda")
+            st.markdown("3. **Error statistik**: Coba dataset yang lebih besar atau seimbang")
+            
+            # Alternative approach dengan pingouin
+            try:
+                st.markdown("### 🔄 Alternatif: Menggunakan Pingouin")
+                import pingouin as pg
+                aov = pg.anova(data=data_anova, dv=num_var, between=[cat_var1, cat_var2])
+                st.dataframe(aov)
+            except:
+                st.info("Pingouin tidak tersedia atau gagal dijalankan")
+            
+            # Source code
+            st.markdown("### 💻 Source Code Two-Way ANOVA")
+            st.code("""
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
@@ -695,41 +765,38 @@ from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
 import plotly.express as px
 
-# Buat dataset contoh
+# Buat dataset contoh yang seimbang
 np.random.seed(42)
 data_anova = pd.DataFrame({
     'Kepuasan': np.concatenate([
-        np.random.normal(85, 5, 20),  # Layanan A
-        np.random.normal(78, 6, 20),  # Layanan B
-        np.random.normal(88, 4, 10)   # Layanan C
+        np.random.normal(85, 5, 15),   # Layanan A - Pemula
+        np.random.normal(88, 4, 15),   # Layanan A - Menengah
+        np.random.normal(78, 6, 15),   # Layanan B - Pemula
+        np.random.normal(82, 5, 15),   # Layanan B - Menengah
+        np.random.normal(90, 4, 15),   # Layanan C - Pemula
+        np.random.normal(92, 3, 15),   # Layanan C - Menengah
     ]),
-    'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10,
-    'TingkatPengalaman': np.concatenate([
-        ['Pemula']*10 + ['Menengah']*10,  # Layanan A
-        ['Pemula']*10 + ['Menengah']*10,  # Layanan B
-        ['Ahli']*10                       # Layanan C
-    ])
+    'JenisLayanan': ['A']*30 + ['B']*30 + ['C']*30,
+    'TingkatPengalaman': ['Pemula']*15 + ['Menengah']*15 + ['Pemula']*15 + ['Menengah']*15 + ['Pemula']*15 + ['Menengah']*15
 })
+
+# Cek tabel kontingensi
+contingency_table = pd.crosstab(data_anova['JenisLayanan'], data_anova['TingkatPengalaman'])
+print("Tabel Kontingensi:")
+print(contingency_table)
 
 # Two-Way ANOVA
 model = ols('Kepuasan ~ C(JenisLayanan) + C(TingkatPengalaman) + C(JenisLayanan):C(TingkatPengalaman)', 
             data=data_anova).fit()
 anova_table = anova_lm(model)
+print("\\nTabel ANOVA:")
 print(anova_table)
 
 # Visualisasi interaksi
 interaction_plot = data_anova.groupby(['JenisLayanan', 'TingkatPengalaman'])['Kepuasan'].mean().reset_index()
 fig = px.line(interaction_plot, x='JenisLayanan', y='Kepuasan', color='TingkatPengalaman')
 fig.show()
-
-# Analisis efek sederhana
-for tingkat in data_anova['TingkatPengalaman'].unique():
-    subset = data_anova[data_anova['TingkatPengalaman'] == tingkat]
-    model_simple = ols('Kepuasan ~ C(JenisLayanan)', data=subset).fit()
-    anova_simple = anova_lm(model_simple)
-    p_simple = anova_simple['PR(>F)'][0]
-    print(f"Effek JenisLayanan untuk {tingkat}: p = {p_simple}")
-        """)
+            """)
 
 # === MENU: UJI HIPOTESIS ===
 elif selected_menu == "Uji Hipotesis":
@@ -751,11 +818,9 @@ elif selected_menu == "Uji Hipotesis":
         st.markdown(f"**p-value: {p_value:.4f}**")
         
         if p_value < 0.05:
-            st.markdown("✅ Tolak H₀ (p < 0.05)")
-            st.markdown("Kesimpulan: Rata-rata berbeda signifikan dari hipotesis")
+            st.markdown("Tolak H₀ (p < 0.05)")
         else:
-            st.markdown("❌ Gagal tolak H₀ (p ≥ 0.05)")
-            st.markdown("Kesimpulan: Tidak ada bukti rata-rata berbeda dari hipotesis")
+            st.markdown("Gagal tolak H₀ (p ≥ 0.05)")
     
     elif test_type == "Uji-t Sampel Berpasangan":
         st.subheader("Uji-t Sampel Berpasangan")
@@ -769,11 +834,9 @@ elif selected_menu == "Uji Hipotesis":
         st.markdown(f"**p-value: {p_value:.4f}**")
         
         if p_value < 0.05:
-            st.markdown("✅ Tolak H₀ (p < 0.05)")
-            st.markdown("Kesimpulan: Terdapat perbedaan signifikan antara dua variabel")
+            st.markdown("Tolak H₀ (p < 0.05)")
         else:
-            st.markdown("❌ Gagal tolak H₀ (p ≥ 0.05)")
-            st.markdown("Kesimpulan: Tidak ada perbedaan signifikan antara dua variabel")
+            st.markdown("Gagal tolak H₀ (p ≥ 0.05)")
     
     elif test_type == "Uji-t Sampel Independen":
         st.subheader("Uji-t Sampel Independen")
@@ -791,17 +854,15 @@ elif selected_menu == "Uji Hipotesis":
         st.markdown(f"**p-value: {p_value:.4f}**")
         
         if p_value < 0.05:
-            st.markdown("✅ Tolak H₀ (p < 0.05)")
-            st.markdown("Kesimpulan: Terdapat perbedaan signifikan antar kelompok")
+            st.markdown("Tolak H₀ (p < 0.05)")
         else:
-            st.markdown("❌ Gagal tolak H₀ (p ≥ 0.05)")
-            st.markdown("Kesimpulan: Tidak ada perbedaan signifikan antar kelompok")
+            st.markdown("Gagal tolak H₀ (p ≥ 0.05)")
     
     # Jenis Kesalahan
     st.markdown("---")
     st.markdown("**Jenis Kesalahan dalam Uji Hipotesis:**")
     st.markdown("- **Type I Error (α):** Menolak H₀ padahal H₀ benar (False Positive)")
-    st.markdown("- **Type II Error (β):** Gagal menolak H₀ padahal H₀ salah (False Positive)")
+    st.markdown("- **Type II Error (β):** Gagal menolak H₀ padahal H₀ salah (False Negative)")
 
     # Source code uji hipotesis
     st.markdown("### Source Code Uji Hipotesis")
