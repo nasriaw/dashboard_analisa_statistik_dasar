@@ -8,6 +8,7 @@ from scipy import stats
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import pingouin as pg
 
 # Load data
@@ -19,14 +20,11 @@ def load_data():
 data = load_data()
 
 # Set page config
-import streamlit as st
 st.set_page_config(
-   page_title="Aplikom Statistika Menggunakan Python",
-   page_icon="📊",
-   layout="wide",
-   initial_sidebar_state="expanded",
-   menu_items=None)
-
+    page_title="Aplikom Statistika Menggunakan Python",
+    page_icon="📊",
+    layout="wide"
+)
 
 # Main content
 st.title("Aplikom Statistika Menggunakan Python")
@@ -36,10 +34,10 @@ st.markdown("**Python Library:** streamlit, pandas, numpy, statsmodels, scipy, s
 st.markdown("---")
 
 # Display data preview
-st.subheader("Preview Data")
-st.dataframe(data) #.head())
+st.subheader("Preview Data Asli")
+st.dataframe(data.head())
 
-# Menu selection using selectbox (box format)
+# Menu selection using selectbox
 st.markdown("### Pilih Menu Analisis")
 menu_options = [
     "Pengertian Statistika",
@@ -52,7 +50,7 @@ menu_options = [
     "Uji Hipotesis"
 ]
 
-selected_menu = st.sidebar.radio("📋 Menu Navigasi:", menu_options)
+selected_menu = st.selectbox("📋 Menu Navigasi:", menu_options)
 
 # === MENU: PENGERTIAN STATISTIKA ===
 if selected_menu == "Pengertian Statistika":
@@ -142,7 +140,7 @@ print(random_sample.head())
 import pandas as pd
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasan_client.csv')
+data = pd.read_csv('data_test_300_kepuasaan_client.csv')
 
 # Create categories
 bins = [0, 40, 60, 80, 100]
@@ -158,8 +156,7 @@ print(stratified_sample.head())
 elif selected_menu == "Statistik Deskriptif":
     st.header("📊 Statistik Deskriptif")
     st.markdown("Analisis statistik deskriptif untuk dataset:")
-    st.dataframe(data.describe().T)  # Tampilkan statistik deskriptif untuk semua kolom numerik
-
+    
     # Select columns for analysis
     numeric_cols = ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien']
     selected_col = st.selectbox("Pilih Variabel:", numeric_cols)
@@ -191,7 +188,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasan_client.csv')
+data = pd.read_csv('data_test_300_kepuasaan_client.csv')
 
 # Select variable
 selected_col = 'KepuasanKlien'
@@ -272,7 +269,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasan_client.csv')
+data = pd.read_csv('data_test_300_kepuasaan_client.csv')
 
 # Histogram
 fig_hist = px.histogram(data, x='KepuasanKlien', nbins=20)
@@ -327,7 +324,7 @@ import pandas as pd
 import plotly.express as px
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasan_client.csv')
+data = pd.read_csv('data_test_300_kepuasaan_client.csv')
 
 # Correlation matrix
 corr_matrix = data.corr()
@@ -370,7 +367,7 @@ elif selected_menu == "Regresi":
         
         # Display results
         st.markdown("**Model Summary:**")
-        st.write(model.summary())
+        st.text(model.summary())
         
         # Predictions
         st.subheader("Prediksi")
@@ -402,7 +399,7 @@ elif selected_menu == "Regresi":
             
             # Display results
             st.markdown("**Model Summary:**")
-            st.write(model.summary())
+            st.text(model.summary())
             
             # Uji asumsi
             st.subheader("Uji Asumsi Regresi")
@@ -435,18 +432,10 @@ elif selected_menu == "Regresi":
             
             # Prediksi
             st.subheader("Prediksi")
-            for i in range(len(x_vars)):
-                st.markdown(f"Masukkan nilai {x_vars[i]}:")
-                new_value = st.slider(f"{x_vars[i]}:",
-                                    int(data[x_vars[i]].min()), int(data[x_vars[i]].max()),
-                                    int(data[x_vars[i]].mean()))
-                X_new = [1] + [new_value if var == x_vars[i] else 0 for var in x_vars]
-                prediction = model.predict(X_new)
-                st.markdown(f"Prediksi {y_var} untuk {x_vars[i]}={new_value}: {prediction[0]:.2f}")
             if len(x_vars) == 1:
-                new_value = st.slider(f"Masukkan nilai {x_vars[0]}:",
-                                    int(data[x_vars[0]].min()), int(data[x_vars[0]].max()),
-                                    int(data[x_vars[0]].mean()))
+                new_value = st.slider(f"Masukkan nilai {x_vars[0]}:", 
+                                     int(data[x_vars[0]].min()), int(data[x_vars[0]].max()), 
+                                     int(data[x_vars[0]].mean()))
                 prediction = model.predict([1, new_value])
                 st.markdown(f"Prediksi {y_var} untuk {x_vars[0]}={new_value}: {prediction[0]:.2f}")
             else:
@@ -462,7 +451,7 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 import plotly.express as px
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasan_client.csv')
+data = pd.read_csv('data_test_300_kepuasaan_client.csv')
 
 # Regresi linear sederhana
 X = data['JamKerja']
@@ -494,38 +483,38 @@ print(vif_data)
     """)
 
 # === MENU: ANOVA ===
-# Tambahkan di bagian ANOVA menu
 elif selected_menu == "ANOVA":
     st.header("📊 Analisis Varians (ANOVA)")
     
-    # Pilih dataset
-    dataset_option = st.selectbox("Pilih Dataset:", 
-                                 ["Dataset Kepuasan Client (Asli)", "Dataset Kepuasan Pelanggan (Contoh)"])
+    # Buat dataset contoh ANOVA
+    st.markdown("### Dataset Contoh untuk ANOVA")
+    st.markdown("Dataset ini menggambarkan tingkat kepuasan pelanggan berdasarkan jenis layanan dan tingkat pengalaman:")
     
-    if dataset_option == "Dataset Kepuasan Client (Asli)":
-        data_anova = data
-        cat_var_options = ['LamaPend']
-        num_var_options = ['KepuasanKlien']
-    else:
-        # Buat dataset contoh
-        data_anova = pd.DataFrame({
-            'Kepuasan': [85, 78, 92, 88, 76, 95, 82, 90, 87, 83,
-                         75, 82, 79, 85, 80, 88, 84, 91, 86, 83,
-                         90, 87, 93, 89, 85, 92, 88, 94, 90, 87,
-                         82, 79, 85, 81, 78, 84, 80, 86, 83, 80,
-                         88, 84, 90, 86, 82, 89, 85, 91, 87, 84],
-            'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10
-        })
-        cat_var_options = ['JenisLayanan']
-        num_var_options = ['Kepuasan']
+    # Buat dataset contoh
+    np.random.seed(42)
+    data_anova = pd.DataFrame({
+        'Kepuasan': np.concatenate([
+            np.random.normal(85, 5, 20),  # Layanan A
+            np.random.normal(78, 6, 20),  # Layanan B
+            np.random.normal(88, 4, 10)   # Layanan C
+        ]),
+        'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10,
+        'TingkatPengalaman': np.concatenate([
+            ['Pemula']*10 + ['Menengah']*10,  # Layanan A
+            ['Pemula']*10 + ['Menengah']*10,  # Layanan B
+            ['Ahli']*10                       # Layanan C
+        ])
+    })
+    
+    st.dataframe(data_anova.head())
     
     # Pilih tipe ANOVA
     anova_type = st.selectbox("Pilih Tipe ANOVA:", ["One-Way ANOVA", "Two-Way ANOVA"])
     
     if anova_type == "One-Way ANOVA":
         st.subheader("One-Way ANOVA")
-        cat_var = st.selectbox("Pilih Variabel Kategori:", cat_var_options)
-        num_var = st.selectbox("Pilih Variabel Numerik:", num_var_options)
+        cat_var = st.selectbox("Pilih Variabel Kategori:", ['JenisLayanan'])
+        num_var = st.selectbox("Pilih Variabel Numerik:", ['Kepuasan'])
         
         try:
             # Perform ANOVA
@@ -542,30 +531,42 @@ elif selected_menu == "ANOVA":
             st.markdown(f"**p-value: {p_value:.4f}**")
             if p_value < 0.05:
                 st.markdown("✅ Ada perbedaan signifikan antara kelompok (p < 0.05)")
-                st.markdown("Kesimpulan: Setidaknya ada satu kelompok yang berbeda secara signifikan")
+                st.markdown("Kesimpulan: Setidaknya ada satu jenis layanan yang berbeda secara signifikan")
             else:
                 st.markdown("❌ Tidak ada perbedaan signifikan antara kelompok (p ≥ 0.05)")
-                st.markdown("Kesimpulan: Tidak ada bukti perbedaan antar kelompok")
+                st.markdown("Kesimpulan: Tidak ada bukti perbedaan antar jenis layanan")
             
             # Post-hoc test (Tukey HSD)
             st.subheader("Post-hoc Test: Tukey HSD")
             try:
-                from statsmodels.stats.multicomp import pairwise_tukeyhsd
                 tukey = pairwise_tukeyhsd(endog=data_anova[num_var], groups=data_anova[cat_var], alpha=0.05)
-                st.dataframe(pd.DataFrame(data=tukey._results_table.data[1:], 
-                                        columns=tukey._results_table.data[0]))
-            except:
-                st.info("Post-hoc test tidak dapat dijalankan untuk dataset ini")
+                tukey_df = pd.DataFrame(data=tukey._results_table.data[1:], 
+                                      columns=tukey._results_table.data[0])
+                st.dataframe(tukey_df)
+                
+                # Interpretasi Tukey
+                significant_pairs = tukey_df[tukey_df['p-adj'] < 0.05]
+                if len(significant_pairs) > 0:
+                    st.markdown("Pasangan kelompok yang berbeda signifikan:")
+                    for _, row in significant_pairs.iterrows():
+                        st.markdown(f"- {row['group1']} vs {row['group2']}: p = {row['p-adj']:.4f}")
+                else:
+                    st.markdown("Tidak ada pasangan kelompok yang berbeda signifikan")
+            except Exception as e:
+                st.info(f"Post-hoc test error: {str(e)}")
             
             # Visualisasi
             st.subheader("Visualisasi Data")
-            fig1 = px.box(data_anova, x=cat_var, y=num_var, title=f'Distribusi {num_var} per {cat_var}')
-            st.plotly_chart(fig1)
+            col1, col2 = st.columns(2)
             
-            # Mean plot
-            means = data_anova.groupby(cat_var)[num_var].mean().reset_index()
-            fig2 = px.bar(means, x=cat_var, y=num_var, title=f'Rata-rata {num_var} per {cat_var}')
-            st.plotly_chart(fig2)
+            with col1:
+                fig1 = px.box(data_anova, x=cat_var, y=num_var, title=f'Distribusi {num_var} per {cat_var}')
+                st.plotly_chart(fig1)
+            
+            with col2:
+                means = data_anova.groupby(cat_var)[num_var].mean().reset_index()
+                fig2 = px.bar(means, x=cat_var, y=num_var, title=f'Rata-rata {num_var} per {cat_var}')
+                st.plotly_chart(fig2)
             
             # Descriptive statistics
             st.subheader("Statistik Deskriptif per Kelompok")
@@ -574,21 +575,26 @@ elif selected_menu == "ANOVA":
             
         except Exception as e:
             st.error(f"Terjadi error saat melakukan ANOVA: {str(e)}")
-            st.markdown("### Source Code One-Way ANOVA")
-            st.code("""
+        
+        # Source code
+        st.markdown("### Source Code One-Way ANOVA")
+        st.code("""
 import pandas as pd
+import numpy as np
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import plotly.express as px
 
 # Buat dataset contoh
+np.random.seed(42)
 data_anova = pd.DataFrame({
-    'Kepuasan': [85, 78, 92, 88, 76, 95, 82, 90, 87, 83,
-                 75, 82, 79, 85, 80, 88, 84, 91, 86, 83,
-                 90, 87, 93, 89, 85, 92, 88, 94, 90, 87,
-                 82, 79, 85, 81, 78, 84, 80, 86, 83, 80,
-                 88, 84, 90, 86, 82, 89, 85, 91, 87, 84],
+    'Kepuasan': np.concatenate([
+        np.random.normal(85, 5, 20),  # Layanan A
+        np.random.normal(78, 6, 20),  # Layanan B
+        np.random.normal(88, 4, 10)   # Layanan C
+    ]),
     'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10
 })
 
@@ -598,7 +604,6 @@ anova_table = anova_lm(model)
 print(anova_table)
 
 # Post-hoc test
-from statsmodels.stats.multicomp import pairwise_tukeyhsd
 tukey = pairwise_tukeyhsd(endog=data_anova['Kepuasan'], groups=data_anova['JenisLayanan'], alpha=0.05)
 print(tukey)
 
@@ -609,23 +614,14 @@ fig_box.show()
 fig_bar = px.bar(data_anova.groupby('JenisLayanan')['Kepuasan'].mean().reset_index(), 
                 x='JenisLayanan', y='Kepuasan')
 fig_bar.show()
-            """)
+        """)
     
     elif anova_type == "Two-Way ANOVA":
         st.subheader("Two-Way ANOVA")
-        
-        # Untuk dataset contoh, tambahkan variabel kategorisasi kedua
-        if dataset_option == "Dataset Kepuasan Pelanggan (Contoh)":
-            data_anova['TingkatPengalaman'] = ['Pemula']*25 + ['Menengah']*25 + ['Ahli']*10
-            cat_var1_options = ['JenisLayanan', 'TingkatPengalaman']
-            cat_var2_options = ['JenisLayanan', 'TingkatPengalaman']
-        else:
-            cat_var1_options = ['LamaPend']
-            cat_var2_options = ['LamaPend']
-        
-        cat_var1 = st.selectbox("Pilih Variabel Kategori 1:", cat_var1_options)
-        cat_var2 = st.selectbox("Pilih Variabel Kategori 2:", cat_var2_options)
-        num_var = st.selectbox("Pilih Variabel Numerik:", num_var_options)
+        cat_var1 = st.selectbox("Pilih Variabel Kategori 1:", ['JenisLayanan', 'TingkatPengalaman'])
+        cat_var2 = st.selectbox("Pilih Variabel Kategori 2:", ['JenisLayanan', 'TingkatPengalaman'], 
+                               index=1 if cat_var1 == 'JenisLayanan' else 0)
+        num_var = st.selectbox("Pilih Variabel Numerik:", ['Kepuasan'])
         
         try:
             # Perform Two-Way ANOVA
@@ -648,6 +644,7 @@ fig_bar.show()
             
             # Interpretasi
             st.subheader("Interpretasi Hasil")
+            
             if p_value_main1 < 0.05:
                 st.markdown(f"✅ Efek utama {cat_var1} signifikan (p < 0.05)")
             else:
@@ -661,37 +658,55 @@ fig_bar.show()
             if p_value_interaction < 0.05:
                 st.markdown("✅ Ada interaksi signifikan antara faktor (p < 0.05)")
                 st.markdown("Kesimpulan: Efek satu faktor bergantung pada faktor lain")
+                st.markdown("Contoh: Perbedaan kepuasan antar layanan berbeda untuk setiap tingkat pengalaman")
             else:
                 st.markdown("❌ Tidak ada interaksi signifikan antara faktor (p ≥ 0.05)")
                 st.markdown("Kesimpulan: Efek faktor bersifat independen")
             
             # Visualisasi interaksi
             st.subheader("Visualisasi Interaksi")
-            if cat_var1 != cat_var2:
-                interaction_plot = data_anova.groupby([cat_var1, cat_var2])[num_var].mean().reset_index()
-                fig = px.line(interaction_plot, x=cat_var1, y=num_var, color=cat_var2, 
-                            title=f'Interaksi {cat_var1} x {cat_var2} terhadap {num_var}')
-                st.plotly_chart(fig)
+            interaction_plot = data_anova.groupby([cat_var1, cat_var2])[num_var].mean().reset_index()
+            fig = px.line(interaction_plot, x=cat_var1, y=num_var, color=cat_var2, 
+                        title=f'Interaksi {cat_var1} x {cat_var2} terhadap {num_var}')
+            st.plotly_chart(fig)
+            
+            # Simple effects analysis
+            st.subheader("Analisis Efek Sederhana")
+            if cat_var1 == 'JenisLayanan' and cat_var2 == 'TingkatPengalaman':
+                for tingkat in data_anova['TingkatPengalaman'].unique():
+                    subset = data_anova[data_anova['TingkatPengalaman'] == tingkat]
+                    model_simple = ols('Kepuasan ~ C(JenisLayanan)', data=subset).fit()
+                    anova_simple = anova_lm(model_simple)
+                    p_simple = anova_simple['PR(>F)'][0]
+                    st.markdown(f"**Efek JenisLayanan untuk {tingkat}: p = {p_simple:.4f}**")
             
         except Exception as e:
             st.error(f"Terjadi error saat melakukan Two-Way ANOVA: {str(e)}")
-            st.markdown("### Source Code Two-Way ANOVA")
-            st.code("""
+        
+        # Source code
+        st.markdown("### Source Code Two-Way ANOVA")
+        st.code("""
 import pandas as pd
+import numpy as np
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
 import plotly.express as px
 
 # Buat dataset contoh
+np.random.seed(42)
 data_anova = pd.DataFrame({
-    'Kepuasan': [85, 78, 92, 88, 76, 95, 82, 90, 87, 83,
-                 75, 82, 79, 85, 80, 88, 84, 91, 86, 83,
-                 90, 87, 93, 89, 85, 92, 88, 94, 90, 87,
-                 82, 79, 85, 81, 78, 84, 80, 86, 83, 80,
-                 88, 84, 90, 86, 82, 89, 85, 91, 87, 84],
+    'Kepuasan': np.concatenate([
+        np.random.normal(85, 5, 20),  # Layanan A
+        np.random.normal(78, 6, 20),  # Layanan B
+        np.random.normal(88, 4, 10)   # Layanan C
+    ]),
     'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10,
-    'TingkatPengalaman': ['Pemula']*25 + ['Menengah']*25 + ['Ahli']*10
+    'TingkatPengalaman': np.concatenate([
+        ['Pemula']*10 + ['Menengah']*10,  # Layanan A
+        ['Pemula']*10 + ['Menengah']*10,  # Layanan B
+        ['Ahli']*10                       # Layanan C
+    ])
 })
 
 # Two-Way ANOVA
@@ -704,14 +719,87 @@ print(anova_table)
 interaction_plot = data_anova.groupby(['JenisLayanan', 'TingkatPengalaman'])['Kepuasan'].mean().reset_index()
 fig = px.line(interaction_plot, x='JenisLayanan', y='Kepuasan', color='TingkatPengalaman')
 fig.show()
-            """)
 
-            
+# Analisis efek sederhana
+for tingkat in data_anova['TingkatPengalaman'].unique():
+    subset = data_anova[data_anova['TingkatPengalaman'] == tingkat]
+    model_simple = ols('Kepuasan ~ C(JenisLayanan)', data=subset).fit()
+    anova_simple = anova_lm(model_simple)
+    p_simple = anova_simple['PR(>F)'][0]
+    print(f"Effek JenisLayanan untuk {tingkat}: p = {p_simple}")
+        """)
+
+# === MENU: UJI HIPOTESIS ===
+elif selected_menu == "Uji Hipotesis":
+    st.header("🧪 Uji Hipotesis")
+    
+    # Pilih tipe uji
+    test_type = st.selectbox("Pilih Tipe Uji:", 
+                            ["Uji-t Sampel Tunggal", "Uji-t Sampel Berpasangan", "Uji-t Sampel Independen"])
+    
+    if test_type == "Uji-t Sampel Tunggal":
+        st.subheader("Uji-t Sampel Tunggal")
+        var = st.selectbox("Pilih Variabel:", ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien'])
+        test_value = st.number_input("Nilai Hipotesis (μ₀):", value=50.0)
+        
+        # Perform t-test
+        t_stat, p_value = stats.ttest_1samp(data[var], test_value)
+        
+        st.markdown(f"**Statistik t: {t_stat:.4f}**")
+        st.markdown(f"**p-value: {p_value:.4f}**")
+        
+        if p_value < 0.05:
+            st.markdown("✅ Tolak H₀ (p < 0.05)")
+            st.markdown("Kesimpulan: Rata-rata berbeda signifikan dari hipotesis")
+        else:
+            st.markdown("❌ Gagal tolak H₀ (p ≥ 0.05)")
+            st.markdown("Kesimpulan: Tidak ada bukti rata-rata berbeda dari hipotesis")
+    
+    elif test_type == "Uji-t Sampel Berpasangan":
+        st.subheader("Uji-t Sampel Berpasangan")
+        var1 = st.selectbox("Pilih Variabel 1:", ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien'])
+        var2 = st.selectbox("Pilih Variabel 2:", ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien'])
+        
+        # Perform paired t-test
+        t_stat, p_value = stats.ttest_rel(data[var1], data[var2])
+        
+        st.markdown(f"**Statistik t: {t_stat:.4f}**")
+        st.markdown(f"**p-value: {p_value:.4f}**")
+        
+        if p_value < 0.05:
+            st.markdown("✅ Tolak H₀ (p < 0.05)")
+            st.markdown("Kesimpulan: Terdapat perbedaan signifikan antara dua variabel")
+        else:
+            st.markdown("❌ Gagal tolak H₀ (p ≥ 0.05)")
+            st.markdown("Kesimpulan: Tidak ada perbedaan signifikan antara dua variabel")
+    
+    elif test_type == "Uji-t Sampel Independen":
+        st.subheader("Uji-t Sampel Independen")
+        var = st.selectbox("Pilih Variabel:", ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien'])
+        group_var = st.selectbox("Pilih Variabel Kelompok:", ['LamaPend'])
+        
+        # Create groups
+        group1 = data[data[group_var] == 0][var]
+        group2 = data[data[group_var] == 1][var]
+        
+        # Perform t-test
+        t_stat, p_value = stats.ttest_ind(group1, group2)
+        
+        st.markdown(f"**Statistik t: {t_stat:.4f}**")
+        st.markdown(f"**p-value: {p_value:.4f}**")
+        
+        if p_value < 0.05:
+            st.markdown("✅ Tolak H₀ (p < 0.05)")
+            st.markdown("Kesimpulan: Terdapat perbedaan signifikan antar kelompok")
+        else:
+            st.markdown("❌ Gagal tolak H₀ (p ≥ 0.05)")
+            st.markdown("Kesimpulan: Tidak ada perbedaan signifikan antar kelompok")
+    
     # Jenis Kesalahan
     st.markdown("---")
     st.markdown("**Jenis Kesalahan dalam Uji Hipotesis:**")
     st.markdown("- **Type I Error (α):** Menolak H₀ padahal H₀ benar (False Positive)")
-    st.markdown("- **Type II Error (β):** Gagal menolak H₀ padahal H₀ salah (False Negative)")
+    st.markdown("- **Type II Error (β):** Gagal menolak H₀ padahal H₀ salah (False Positive)")
 
     # Source code uji hipotesis
     st.markdown("### Source Code Uji Hipotesis")
