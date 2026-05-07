@@ -494,7 +494,7 @@ print(vif_data)
     """)
 
 # === MENU: ANOVA ===
-elif selected_menu == "ANOVA":
+if selected_menu == "ANOVA":
     st.header("📊 Analisis Varians (ANOVA)")
     
     # Pilih tipe ANOVA
@@ -505,56 +505,33 @@ elif selected_menu == "ANOVA":
         cat_var = st.selectbox("Pilih Variabel Kategori:", ['LamaPend'])
         num_var = st.selectbox("Pilih Variabel Numerik:", ['KepuasanKlien'])
         
-        # Perform ANOVA
-        model = ols(f'{num_var} ~ C({cat_var})', data=data).fit()
-        anova_table = anova_lm(model)
-        
-        st.markdown("**Tabel ANOVA:**")
-        st.dataframe(anova_table)
-        
-        # Interpretasi
-        p_value = anova_table['PR(>F)'][0]
-        st.markdown(f"**p-value: {p_value:.4f}**")
-        if p_value < 0.05:
-            st.markdown("Ada perbedaan signifikan antara kelompok (p < 0.05)")
-        else:
-            st.markdown("Tidak ada perbedaan signifikan antara kelompok (p ≥ 0.05)")
-        
-        # Visualisasi
-        st.subheader("Boxplot per Kelompok")
-        fig = px.box(data, x=cat_var, y=num_var)
-        st.plotly_chart(fig)
-    
-    elif anova_type == "Two-Way ANOVA":
-        st.subheader("Two-Way ANOVA")
-        cat_var1 = st.selectbox("Pilih Variabel Kategori 1:", ['LamaPend'])
-        cat_var2 = st.selectbox("Pilih Variabel Kategori 2:", ['LamaPend'])  # Note: Using same var for demo
-        num_var = st.selectbox("Pilih Variabel Numerik:", ['KepuasanKlien'])
-        
-        # Perform Two-Way ANOVA
-        model = ols(f'{num_var} ~ C({cat_var1}) + C({cat_var2}) + C({cat_var1}):C({cat_var2})', data=data).fit()
-        anova_table = anova_lm(model)
-        
-        st.markdown("**Tabel ANOVA:**")
-        st.dataframe(anova_table)
-        
-        # Interpretasi
-        p_value_main1 = anova_table['PR(>F)'][0]
-        p_value_main2 = anova_table['PR(>F)'][1]
-        p_value_interaction = anova_table['PR(>F)'][2]
-        
-        st.markdown(f"**p-value {cat_var1}: {p_value_main1:.4f}**")
-        st.markdown(f"**p-value {cat_var2}: {p_value_main2:.4f}**")
-        st.markdown(f"**p-value Interaksi: {p_value_interaction:.4f}**")
-        
-        if p_value_interaction < 0.05:
-            st.markdown("Ada interaksi signifikan antara faktor (p < 0.05)")
-        else:
-            st.markdown("Tidak ada interaksi signifikan antara faktor (p ≥ 0.05)")
-
-    # Source code ANOVA
-    st.markdown("### Source Code Analisis ANOVA")
-    st.code("""
+        try:
+            # Perform ANOVA
+            model = ols(f'{num_var} ~ C({cat_var})', data=data).fit()
+            anova_table = anova_lm(model)
+            
+            st.markdown("**Tabel ANOVA:**")
+            st.dataframe(anova_table)
+            
+            # Get p-value safely
+            p_value_col = 'PR(>F)' if 'PR(>F)' in anova_table.columns else 'PR(>F)'  # Handle different versions
+            p_value = anova_table[p_value_col][0]
+            
+            st.markdown(f"**p-value: {p_value:.4f}**")
+            if p_value < 0.05:
+                st.markdown("Ada perbedaan signifikan antara kelompok (p < 0.05)")
+            else:
+                st.markdown("Tidak ada perbedaan signifikan antara kelompok (p ≥ 0.05)")
+            
+            # Visualisasi
+            st.subheader("Boxplot per Kelompok")
+            fig = px.box(data, x=cat_var, y=num_var)
+            st.plotly_chart(fig)
+            
+        except Exception as e:
+            st.error(f"Terjadi error saat melakukan ANOVA: {str(e)}")
+            st.markdown("### Source Code One-Way ANOVA")
+            st.code("""
 import pandas as pd
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
@@ -562,83 +539,79 @@ from statsmodels.stats.anova import anova_lm
 import plotly.express as px
 
 # Load data
-data = pd.read_csv('data_test_300_kepuasan_client.csv')
+data = pd.read_csv('data_test_300_kepuasaan_client.csv')
 
 # One-Way ANOVA
 model = ols('KepuasanKlien ~ C(LamaPend)', data=data).fit()
 anova_table = anova_lm(model)
 print(anova_table)
 
+# Get p-value
+p_value = anova_table['PR(>F)'][0]
+print(f"p-value: {p_value}")
+
+# Visualisasi
+fig = px.box(data, x='LamaPend', y='KepuasanKlien')
+fig.show()
+            """)
+    
+    elif anova_type == "Two-Way ANOVA":
+        st.subheader("Two-Way ANOVA")
+        cat_var1 = st.selectbox("Pilih Variabel Kategori 1:", ['LamaPend'])
+        cat_var2 = st.selectbox("Pilih Variabel Kategori 2:", ['LamaPend'])  # Note: Using same var for demo
+        num_var = st.selectbox("Pilih Variabel Numerik:", ['KepuasanKlien'])
+        
+        try:
+            # Perform Two-Way ANOVA
+            model = ols(f'{num_var} ~ C({cat_var1}) + C({cat_var2}) + C({cat_var1}):C({cat_var2})', data=data).fit()
+            anova_table = anova_lm(model)
+            
+            st.markdown("**Tabel ANOVA:**")
+            st.dataframe(anova_table)
+            
+            # Get p-values safely
+            p_value_col = 'PR(>F)' if 'PR(>F)' in anova_table.columns else 'PR(>F)'
+            
+            p_value_main1 = anova_table[p_value_col][0]
+            p_value_main2 = anova_table[p_value_col][1]
+            p_value_interaction = anova_table[p_value_col][2]
+            
+            st.markdown(f"**p-value {cat_var1}: {p_value_main1:.4f}**")
+            st.markdown(f"**p-value {cat_var2}: {p_value_main2:.4f}**")
+            st.markdown(f"**p-value Interaksi: {p_value_interaction:.4f}**")
+            
+            if p_value_interaction < 0.05:
+                st.markdown("Ada interaksi signifikan antara faktor (p < 0.05)")
+            else:
+                st.markdown("Tidak ada interaksi signifikan antara faktor (p ≥ 0.05)")
+                
+        except Exception as e:
+            st.error(f"Terjadi error saat melakukan Two-Way ANOVA: {str(e)}")
+            st.markdown("### Source Code Two-Way ANOVA")
+            st.code("""
+import pandas as pd
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.stats.anova import anova_lm
+
+# Load data
+data = pd.read_csv('data_test_300_kepuasaan_client.csv')
+
 # Two-Way ANOVA
 model = ols('KepuasanKlien ~ C(LamaPend) + C(LamaPend) + C(LamaPend):C(LamaPend)', data=data).fit()
 anova_table = anova_lm(model)
 print(anova_table)
 
-# Visualisasi
-fig = px.box(data, x='LamaPend', y='KepuasanKlien')
-fig.show()
-    """)
+# Get p-values
+p_value_col = 'PR(>F)' if 'PR(>F)' in anova_table.columns else 'PR(>F)'
+p_value_main1 = anova_table[p_value_col][0]
+p_value_main2 = anova_table[p_value_col][1]
+p_value_interaction = anova_table[p_value_col][2]
 
-# === MENU: UJI HIPOTESIS ===
-elif selected_menu == "Uji Hipotesis":
-    st.header("🧪 Uji Hipotesis")
-    
-    # Pilih tipe uji
-    test_type = st.selectbox("Pilih Tipe Uji:", 
-                            ["Uji-t Sampel Tunggal", "Uji-t Sampel Berpasangan", "Uji-t Sampel Independen"])
-    
-    if test_type == "Uji-t Sampel Tunggal":
-        st.subheader("Uji-t Sampel Tunggal")
-        var = st.selectbox("Pilih Variabel:", ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien'])
-        test_value = st.number_input("Nilai Hipotesis (μ₀):", value=50.0)
-        
-        # Perform t-test
-        t_stat, p_value = stats.ttest_1samp(data[var], test_value)
-        
-        st.markdown(f"**Statistik t: {t_stat:.4f}**")
-        st.markdown(f"**p-value: {p_value:.4f}**")
-        
-        if p_value < 0.05:
-            st.markdown("Tolak H₀ (p < 0.05)")
-        else:
-            st.markdown("Gagal tolak H₀ (p ≥ 0.05)")
-    
-    elif test_type == "Uji-t Sampel Berpasangan":
-        st.subheader("Uji-t Sampel Berpasangan")
-        var1 = st.selectbox("Pilih Variabel 1:", ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien'])
-        var2 = st.selectbox("Pilih Variabel 2:", ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien'])
-        
-        # Perform paired t-test
-        t_stat, p_value = stats.ttest_rel(data[var1], data[var2])
-        
-        st.markdown(f"**Statistik t: {t_stat:.4f}**")
-        st.markdown(f"**p-value: {p_value:.4f}**")
-        
-        if p_value < 0.05:
-            st.markdown("Tolak H₀ (p < 0.05)")
-        else:
-            st.markdown("Gagal tolak H₀ (p ≥ 0.05)")
-    
-    elif test_type == "Uji-t Sampel Independen":
-        st.subheader("Uji-t Sampel Independen")
-        var = st.selectbox("Pilih Variabel:", ['Psichotest', 'LamaPend', 'IQ', 'JamTraining', 'JamKerja', 'KepuasanKlien'])
-        group_var = st.selectbox("Pilih Variabel Kelompok:", ['LamaPend'])
-        
-        # Create groups
-        group1 = data[data[group_var] == 0][var]
-        group2 = data[data[group_var] == 1][var]
-        
-        # Perform t-test
-        t_stat, p_value = stats.ttest_ind(group1, group2)
-        
-        st.markdown(f"**Statistik t: {t_stat:.4f}**")
-        st.markdown(f"**p-value: {p_value:.4f}**")
-        
-        if p_value < 0.05:
-            st.markdown("Tolak H₀ (p < 0.05)")
-        else:
-            st.markdown("Gagal tolak H₀ (p ≥ 0.05)")
-    
+print(f"p-value main effect 1: {p_value_main1}")
+print(f"p-value main effect 2: {p_value_main2}")
+print(f"p-value interaction: {p_value_interaction}")
+            """)
     # Jenis Kesalahan
     st.markdown("---")
     st.markdown("**Jenis Kesalahan dalam Uji Hipotesis:**")
