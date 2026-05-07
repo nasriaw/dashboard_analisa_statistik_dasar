@@ -494,6 +494,220 @@ print(vif_data)
     """)
 
 # === MENU: ANOVA ===
+# Tambahkan di bagian ANOVA menu
+elif selected_menu == "ANOVA":
+    st.header("📊 Analisis Varians (ANOVA)")
+    
+    # Pilih dataset
+    dataset_option = st.selectbox("Pilih Dataset:", 
+                                 ["Dataset Kepuasan Client (Asli)", "Dataset Kepuasan Pelanggan (Contoh)"])
+    
+    if dataset_option == "Dataset Kepuasan Client (Asli)":
+        data_anova = data
+        cat_var_options = ['LamaPend']
+        num_var_options = ['KepuasanKlien']
+    else:
+        # Buat dataset contoh
+        data_anova = pd.DataFrame({
+            'Kepuasan': [85, 78, 92, 88, 76, 95, 82, 90, 87, 83,
+                         75, 82, 79, 85, 80, 88, 84, 91, 86, 83,
+                         90, 87, 93, 89, 85, 92, 88, 94, 90, 87,
+                         82, 79, 85, 81, 78, 84, 80, 86, 83, 80,
+                         88, 84, 90, 86, 82, 89, 85, 91, 87, 84],
+            'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10
+        })
+        cat_var_options = ['JenisLayanan']
+        num_var_options = ['Kepuasan']
+    
+    # Pilih tipe ANOVA
+    anova_type = st.selectbox("Pilih Tipe ANOVA:", ["One-Way ANOVA", "Two-Way ANOVA"])
+    
+    if anova_type == "One-Way ANOVA":
+        st.subheader("One-Way ANOVA")
+        cat_var = st.selectbox("Pilih Variabel Kategori:", cat_var_options)
+        num_var = st.selectbox("Pilih Variabel Numerik:", num_var_options)
+        
+        try:
+            # Perform ANOVA
+            model = ols(f'{num_var} ~ C({cat_var})', data=data_anova).fit()
+            anova_table = anova_lm(model)
+            
+            st.markdown("**Tabel ANOVA:**")
+            st.dataframe(anova_table)
+            
+            # Get p-value safely
+            p_value_col = 'PR(>F)' if 'PR(>F)' in anova_table.columns else 'PR(>F)'
+            p_value = anova_table[p_value_col][0]
+            
+            st.markdown(f"**p-value: {p_value:.4f}**")
+            if p_value < 0.05:
+                st.markdown("✅ Ada perbedaan signifikan antara kelompok (p < 0.05)")
+                st.markdown("Kesimpulan: Setidaknya ada satu kelompok yang berbeda secara signifikan")
+            else:
+                st.markdown("❌ Tidak ada perbedaan signifikan antara kelompok (p ≥ 0.05)")
+                st.markdown("Kesimpulan: Tidak ada bukti perbedaan antar kelompok")
+            
+            # Post-hoc test (Tukey HSD)
+            st.subheader("Post-hoc Test: Tukey HSD")
+            try:
+                from statsmodels.stats.multicomp import pairwise_tukeyhsd
+                tukey = pairwise_tukeyhsd(endog=data_anova[num_var], groups=data_anova[cat_var], alpha=0.05)
+                st.dataframe(pd.DataFrame(data=tukey._results_table.data[1:], 
+                                        columns=tukey._results_table.data[0]))
+            except:
+                st.info("Post-hoc test tidak dapat dijalankan untuk dataset ini")
+            
+            # Visualisasi
+            st.subheader("Visualisasi Data")
+            fig1 = px.box(data_anova, x=cat_var, y=num_var, title=f'Distribusi {num_var} per {cat_var}')
+            st.plotly_chart(fig1)
+            
+            # Mean plot
+            means = data_anova.groupby(cat_var)[num_var].mean().reset_index()
+            fig2 = px.bar(means, x=cat_var, y=num_var, title=f'Rata-rata {num_var} per {cat_var}')
+            st.plotly_chart(fig2)
+            
+            # Descriptive statistics
+            st.subheader("Statistik Deskriptif per Kelompok")
+            desc_stats = data_anova.groupby(cat_var)[num_var].describe()
+            st.dataframe(desc_stats)
+            
+        except Exception as e:
+            st.error(f"Terjadi error saat melakukan ANOVA: {str(e)}")
+            st.markdown("### Source Code One-Way ANOVA")
+            st.code("""
+import pandas as pd
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.stats.anova import anova_lm
+import plotly.express as px
+
+# Buat dataset contoh
+data_anova = pd.DataFrame({
+    'Kepuasan': [85, 78, 92, 88, 76, 95, 82, 90, 87, 83,
+                 75, 82, 79, 85, 80, 88, 84, 91, 86, 83,
+                 90, 87, 93, 89, 85, 92, 88, 94, 90, 87,
+                 82, 79, 85, 81, 78, 84, 80, 86, 83, 80,
+                 88, 84, 90, 86, 82, 89, 85, 91, 87, 84],
+    'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10
+})
+
+# One-Way ANOVA
+model = ols('Kepuasan ~ C(JenisLayanan)', data=data_anova).fit()
+anova_table = anova_lm(model)
+print(anova_table)
+
+# Post-hoc test
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+tukey = pairwise_tukeyhsd(endog=data_anova['Kepuasan'], groups=data_anova['JenisLayanan'], alpha=0.05)
+print(tukey)
+
+# Visualisasi
+fig_box = px.box(data_anova, x='JenisLayanan', y='Kepuasan')
+fig_box.show()
+
+fig_bar = px.bar(data_anova.groupby('JenisLayanan')['Kepuasan'].mean().reset_index(), 
+                x='JenisLayanan', y='Kepuasan')
+fig_bar.show()
+            """)
+    
+    elif anova_type == "Two-Way ANOVA":
+        st.subheader("Two-Way ANOVA")
+        
+        # Untuk dataset contoh, tambahkan variabel kategorisasi kedua
+        if dataset_option == "Dataset Kepuasan Pelanggan (Contoh)":
+            data_anova['TingkatPengalaman'] = ['Pemula']*25 + ['Menengah']*25 + ['Ahli']*10
+            cat_var1_options = ['JenisLayanan', 'TingkatPengalaman']
+            cat_var2_options = ['JenisLayanan', 'TingkatPengalaman']
+        else:
+            cat_var1_options = ['LamaPend']
+            cat_var2_options = ['LamaPend']
+        
+        cat_var1 = st.selectbox("Pilih Variabel Kategori 1:", cat_var1_options)
+        cat_var2 = st.selectbox("Pilih Variabel Kategori 2:", cat_var2_options)
+        num_var = st.selectbox("Pilih Variabel Numerik:", num_var_options)
+        
+        try:
+            # Perform Two-Way ANOVA
+            model = ols(f'{num_var} ~ C({cat_var1}) + C({cat_var2}) + C({cat_var1}):C({cat_var2})', data=data_anova).fit()
+            anova_table = anova_lm(model)
+            
+            st.markdown("**Tabel ANOVA:**")
+            st.dataframe(anova_table)
+            
+            # Get p-values safely
+            p_value_col = 'PR(>F)' if 'PR(>F)' in anova_table.columns else 'PR(>F)'
+            
+            p_value_main1 = anova_table[p_value_col][0]
+            p_value_main2 = anova_table[p_value_col][1]
+            p_value_interaction = anova_table[p_value_col][2]
+            
+            st.markdown(f"**p-value {cat_var1}: {p_value_main1:.4f}**")
+            st.markdown(f"**p-value {cat_var2}: {p_value_main2:.4f}**")
+            st.markdown(f"**p-value Interaksi: {p_value_interaction:.4f}**")
+            
+            # Interpretasi
+            st.subheader("Interpretasi Hasil")
+            if p_value_main1 < 0.05:
+                st.markdown(f"✅ Efek utama {cat_var1} signifikan (p < 0.05)")
+            else:
+                st.markdown(f"❌ Efek utama {cat_var1} tidak signifikan (p ≥ 0.05)")
+                
+            if p_value_main2 < 0.05:
+                st.markdown(f"✅ Efek utama {cat_var2} signifikan (p < 0.05)")
+            else:
+                st.markdown(f"❌ Efek utama {cat_var2} tidak signifikan (p ≥ 0.05)")
+                
+            if p_value_interaction < 0.05:
+                st.markdown("✅ Ada interaksi signifikan antara faktor (p < 0.05)")
+                st.markdown("Kesimpulan: Efek satu faktor bergantung pada faktor lain")
+            else:
+                st.markdown("❌ Tidak ada interaksi signifikan antara faktor (p ≥ 0.05)")
+                st.markdown("Kesimpulan: Efek faktor bersifat independen")
+            
+            # Visualisasi interaksi
+            st.subheader("Visualisasi Interaksi")
+            if cat_var1 != cat_var2:
+                interaction_plot = data_anova.groupby([cat_var1, cat_var2])[num_var].mean().reset_index()
+                fig = px.line(interaction_plot, x=cat_var1, y=num_var, color=cat_var2, 
+                            title=f'Interaksi {cat_var1} x {cat_var2} terhadap {num_var}')
+                st.plotly_chart(fig)
+            
+        except Exception as e:
+            st.error(f"Terjadi error saat melakukan Two-Way ANOVA: {str(e)}")
+            st.markdown("### Source Code Two-Way ANOVA")
+            st.code("""
+import pandas as pd
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.stats.anova import anova_lm
+import plotly.express as px
+
+# Buat dataset contoh
+data_anova = pd.DataFrame({
+    'Kepuasan': [85, 78, 92, 88, 76, 95, 82, 90, 87, 83,
+                 75, 82, 79, 85, 80, 88, 84, 91, 86, 83,
+                 90, 87, 93, 89, 85, 92, 88, 94, 90, 87,
+                 82, 79, 85, 81, 78, 84, 80, 86, 83, 80,
+                 88, 84, 90, 86, 82, 89, 85, 91, 87, 84],
+    'JenisLayanan': ['A']*20 + ['B']*20 + ['C']*10,
+    'TingkatPengalaman': ['Pemula']*25 + ['Menengah']*25 + ['Ahli']*10
+})
+
+# Two-Way ANOVA
+model = ols('Kepuasan ~ C(JenisLayanan) + C(TingkatPengalaman) + C(JenisLayanan):C(TingkatPengalaman)', 
+            data=data_anova).fit()
+anova_table = anova_lm(model)
+print(anova_table)
+
+# Visualisasi interaksi
+interaction_plot = data_anova.groupby(['JenisLayanan', 'TingkatPengalaman'])['Kepuasan'].mean().reset_index()
+fig = px.line(interaction_plot, x='JenisLayanan', y='Kepuasan', color='TingkatPengalaman')
+fig.show()
+            """)
+
+
+
 import pingouin as pg
 aov = pg.anova(data=data, dv='KepuasanKlien', between='LamaPend')
 print(aov)
