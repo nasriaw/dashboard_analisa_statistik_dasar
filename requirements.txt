@@ -5,5 +5,5 @@ matplotlib
 seaborn 
 plotly
 scipy
-statsmodels
+statsmodels>=0.13.0
 pingouin 
