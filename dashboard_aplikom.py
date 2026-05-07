@@ -20,11 +20,13 @@ def load_data():
 data = load_data()
 
 # Set page config
+import streamlit as st
 st.set_page_config(
-    page_title="Aplikom Statistika Menggunakan Python",
-    page_icon="📊",
-    layout="wide"
-)
+   page_title="Aplikom Statistika Menggunakan Python",
+   page_icon="📊",
+   layout="wide",
+   initial_sidebar_state="expanded",
+   menu_items=None)
 
 # Main content
 st.title("Aplikom Statistika Menggunakan Python")
