@@ -5,7 +5,5 @@ matplotlib
 seaborn 
 plotly
 scipy
-statsmodels.api 
-statsmodels.formula.api 
-statsmodels.stats.anova 
+statsmodels
 pingouin 
