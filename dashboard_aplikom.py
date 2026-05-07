@@ -494,6 +494,9 @@ print(vif_data)
     """)
 
 # === MENU: ANOVA ===
+import pingouin as pg
+aov = pg.anova(data=data, dv='KepuasanKlien', between='LamaPend')
+print(aov)
 if selected_menu == "ANOVA":
     st.header("📊 Analisis Varians (ANOVA)")
     
