@@ -516,7 +516,7 @@ elif selected_menu == "ANOVA":
         'TingkatPengalaman': ['Pemula']*15 + ['Menengah']*15 + ['Pemula']*15 + ['Menengah']*15 + ['Pemula']*15 + ['Menengah']*15
     })
     
-    st.dataframe(data_anova.head())
+    st.dataframe(data_anova) #.head())
     st.write(f"Total observasi: {len(data_anova)}")
     
     # Tampilkan tabel kontingensi
