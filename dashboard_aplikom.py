@@ -83,8 +83,53 @@ with st.sidebar:
 # --- HOME ---
 if menu == "Home":
     render_header("🔧 Aplikasi Python Untuk Statistika Dasar")
-    st.subheader("a. Pengertian")
-    st.write("Aplikasi ini dirancang untuk memudahkan komputasi statistik manajemen bagi mahasiswa S1 Manajemen STIEI Malang.")
+    st.subheader("a. Review Materi Statistika Dasar")
+    st.write("Aplikasi Python ini lanjutan Kuliah Economic Statistics bagi mahasiswa S1 Manajemen STIEI Malang, dari aspek penerapan aplikasi komputer menggunakan bahasa python." \
+    " Bagian ini mengulang singkat materi utama pada kuliah EConomic Statistics yang meliputi:")
+    st.markdown("### Konsep Data dan Sample")
+    st.markdown("Data adalah informasi yang diorganisir dalam bentuk yang dapat dianalisis. Sample adalah subset dari populasi yang digunakan untuk membuat kesimpulan tentang populasi secara keseluruhan.")
+    
+    st.markdown("### Populasi, Sampling dan Teknik Sampling")
+    st.markdown("Populasi adalah keseluruhan subjek yang diteliti. Sampling adalah proses pemilihan sample dari populasi. Teknik sampling meliputi:")
+    st.markdown("- Random Sampling")
+    st.markdown("- Stratified Sampling")
+    st.markdown("- Cluster Sampling")
+    st.markdown("- Systematic Sampling")
+    
+    st.markdown("### Distribusi")
+    st.markdown("Distribusi statistik menggambarkan bagaimana data tersebar. Contoh: distribusi normal, distribusi t, distribusi chi-square.")
+    
+    st.markdown("### Tipe dan Kegunaan Analisis Statistik")
+    st.markdown("- **Analisis Deskriptif:** Ringkasan data (mean, median, modus)")
+    st.markdown("- **Analisis Inferensial:** Kesimpulan tentang populasi dari data sample")
+    st.markdown("- **Analisis Prediktif:** Memprediksi nilai berdasarkan data")
+    
+    st.markdown("### Atribut Dasar Olah Data")
+    st.markdown("- Tipe data: numerik, kategorikal")
+    st.markdown("- Skala pengukuran: nominal, ordinal, interval, rasio")
+    
+    st.markdown("### Pembersihan Data (Data Cleaning)")
+    st.markdown("Proses mengidentifikasi dan memperbaiki kesalahan dalam dataset untuk meningkatkan kualitas data.")
+    
+    st.markdown("### Visualisasi Data")
+    st.markdown("- Scatter: Hubungan antar variabel")
+    st.markdown("- Line: Tren data")
+    st.markdown("- Bar: Perbandingan kategori")
+    st.markdown("- Boxplot: Distribusi dan outlier")
+    
+    st.markdown("### Statistik Deskripsi dan Inferensi")
+    st.markdown("- **Deskripsi:** Ringkasan statistik")
+    st.markdown("- **Inferensi:** Pengujian hipotesis, estimasi parameter")
+    
+    st.markdown("### Korelasi")
+    st.markdown("Ukuran kekuatan dan arah hubungan antara dua variabel.")
+    
+    st.markdown("### Regresi")
+    st.markdown("Model untuk memprediksi nilai variabel dependen berdasarkan variabel independen.")
+    
+    st.markdown("### Uji Hipotesis")
+    st.markdown("Prosedur untuk membuat keputusan tentang populasi berdasarkan data sample.")
+
     handle_upload("home_up")
 
 # --- ANALISIS DESKRIPSI ---
