@@ -53,7 +53,7 @@ def handle_upload(key):
     
     st.markdown("""
     <div class="instruction-box">
-    ⚠️ <b>Jika Menggunakan Data Baru (Input), gunakan 'Browse Files/Upload', dengan ketentuan:</b><br>
+    ⚠️ <b>Jika Menggunakan Data Baru (Input), gunakan 'Browse File/Upload', dengan ketentuan:</b><br>
     - Gunakan file format <b>.CSV</b>.<br>
     - Variabel <b>Y (Dependen)</b>: Harus kolom paling <b>KANAN</b>.<br>
     - Variabel <b>X (Independen)</b>: Semua kolom dari pertama sampai sebelum terakhir.
